@@ -3,9 +3,9 @@ import './App.css';
 import source from './data.js';
 
 function App() {
-  // const [Data, fetchData] = useState([])
+  const [Data, fetchData] = useState({})
 
-  // fetch('https://api.up2tom.com/v3/models/58d3bcf97c6b1644db73ad12', {
+  // fetch('https://api.up2tom.com/v3/models', {
   //       crossDomain:true,
   //       method: 'GET',
   //       headers: { 
@@ -14,26 +14,34 @@ function App() {
   //       },
   //     })
   
-  // const getData = () => {
-  //   fetch('https://api.up2tom.com/v3/models/', {
-  //     crossDomain:true,
-  //     method: 'GET',
-  //     headers: { 
-  //       'Authorization': 'Token 307bfd5fa011428ff198bb37547f979',
-  //       'contentType': 'application/vnd.api+json',
-  //       'Access-Control-Allow-Origin': '*'
-  //     },
-  //   })
-  //     .then((res) => res.json())
-  //     .then((res) => {
-  //       console.log(res)
-  //       fetchData(res)
-  //     })
-  // }
+  const getData2 = () => {
+    fetch('/v3/models/58d3bcf97c6b1644db73ad12', {
+      method: 'GET',
+      headers: { 
+        'Authorization': 'Token 9307bfd5fa011428ff198bb37547f979',
+        'contentType': 'application/vnd.api+json',
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if(res.error) {
+          return;
+        }
+        const model = {...res?.data?.attributes};
+        const name = model.name;
+        const description = model.description;
+        const metadata = model.metadata;
+        const prediction = metadata.prediction;
+        const attributes = metadata.attributes;
+        fetchData({id: res?.data?.id, name, description, prediction, attributes});
+      }).catch((err) => {
+        console.log(err)
+      })
+  }
 
-  // useEffect(() => {
-  //   getData()
-  // }, [])
+  useEffect(() => {
+    getData2();
+  }, [])
 
   
   // console.log(data)
@@ -50,10 +58,10 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1>{getData().name}</h1>
+        <h1>{Data?.name}</h1>
       </header>
       <form>
-        {getData().attributes.map((item, index) => {
+        {Data?.attributes?.map((item, index) => {
             return (
               <div key={index}>
                 <label>{item.question}</label>
