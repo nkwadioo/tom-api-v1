@@ -12,11 +12,11 @@ span.error {
   font-size: .7rem;
 }
 
-button[type="submit"] {
+button {
   position: relative;
 }
 
-button[type="submit"]::after {
+button::after {
   content: '';
   position: absolute;
   top: 0;

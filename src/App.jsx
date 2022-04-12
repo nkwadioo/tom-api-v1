@@ -23,6 +23,7 @@ function App() {
       .then((res) => res.json())
       .then((res) => {
         if(res.error || res.errors || !res.data) {
+          alert('Error loading model')
           return;
         }
         const model = {...res?.data?.attributes};
@@ -144,6 +145,7 @@ function App() {
     e.preventDefault();
     const {input} = ModelForm;
     if(!checkDecisionError() || !validateForm()) {
+      alert('Validation Error')
       return;
     }
 
@@ -168,40 +170,46 @@ function App() {
     .then((res) => res.json())
     .then((res) => {
       if(res.error || res.errors) {
+        alert('Unable to submit model')
         return;
       }
+      alert('Successfully submitted model')
       console.log(res);
     })
   }
 
   return (
     <div className="App">
-      <div class="bg-green-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1">
-        <div class="flex flex-row">
-          <div class="px-2">
-            {/* <svg width="24" height="24" viewBox="0 0 1792 1792" fill="#44C997" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1299 813l-422 422q-19 19-45 19t-45-19l-294-294q-19-19-19-45t19-45l102-102q19-19 45-19t45 19l147 147 275-275q19-19 45-19t45 19l102 102q19 19 19 45t-19 45zm141 83q0-148-73-273t-198-198-273-73-273 73-198 198-73 273 73 273 198 198 273 73 273-73 198-198 73-273zm224 0q0 209-103 385.5t-279.5 279.5-385.5 103-385.5-103-279.5-279.5-103-385.5 103-385.5 279.5-279.5 385.5-103 385.5 103 279.5 279.5 103 385.5z"/>
-              </svg> */}
+      <div className="notification">
+        <div class="bg-green-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
+                    w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
+                    hidden
+                    ">
+          <div class="flex flex-row">
+            <div class="px-2">
+            </div>
+            <div class="ml-2 mr-6">
+              <span class="font-semibold">Successfully Submitted!</span>
+              <span class="block text-white">Message</span>
+            </div>
           </div>
-          <div class="ml-2 mr-6">
-            <span class="font-semibold">Successfully Saved!</span>
-            <span class="block text-white">Anyone with a link can now view this file</span>
+        </div>
+        
+        <div class="bg-red-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
+                      w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
+                      hidden
+                      ">
+          <div class="flex flex-row">
+            <div class="px-2">
+            </div>
+            <div class="ml-2 mr-6">
+              <span class="font-semibold">Error Submitting!</span>
+              <span class="block text-white">Message</span>
+            </div>
           </div>
         </div>
       </div>
-      <div class="bg-red-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1">
-        <div class="flex flex-row">
-          <div class="px-2">
-            {/* <svg width="24" height="24" viewBox="0 0 1792 1792" fill="#44C997" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1299 813l-422 422q-19 19-45 19t-45-19l-294-294q-19-19-19-45t19-45l102-102q19-19 45-19t45 19l147 147 275-275q19-19 45-19t45 19l102 102q19 19 19 45t-19 45zm141 83q0-148-73-273t-198-198-273-73-273 73-198 198-73 273 73 273 198 198 273 73 273-73 198-198 73-273zm224 0q0 209-103 385.5t-279.5 279.5-385.5 103-385.5-103-279.5-279.5-103-385.5 103-385.5 279.5-279.5 385.5-103 385.5 103 279.5 279.5 103 385.5z"/>
-              </svg> */}
-          </div>
-          <div class="ml-2 mr-6">
-            <span class="font-semibold">Error Saving!</span>
-            <span class="block text-white">Anyone with a link can now view this file</span>
-          </div>
-        </div>
-      </div>
+      
     <>
       <nav className='shadow'>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -304,7 +312,13 @@ function App() {
               })}
 
             </div>
-            <button type="submit" className='bg-blue-500 hover:bg-blue-600 float-right px-3 py-1'>Submit &gt; </button>
+            {Data.prediction && 
+              <button type="submit" className='bg-blue-500 hover:bg-blue-600 float-right px-3 py-1'>Submit &gt; </button>
+            }
+            {!Data?.prediction && 
+              <button type="button" className='bg-blue-200 text-gray-700 pointer-events-none float-right px-3 py-1'>Submit &gt; </button>
+            }
+            
           
           </form>
         </main>
