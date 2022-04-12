@@ -51,8 +51,17 @@ function App() {
       const prediction = metadata.prediction;
       const attributes = metadata.attributes;
 
-      setData({id: res?.data?.id, name, description, prediction, attributes});
       setExclusions({...exclusions})
+      setData({id: res?.data?.id, name, description, prediction, attributes});
+      const att = {};
+      attributes.map(a => att[a.name] = '');
+      setModelForm({
+        input: {
+          [prediction.name]: '',
+          ...att
+        }
+      });
+
     })
   }
 
@@ -60,58 +69,92 @@ function App() {
     getData2();
   }, [])
 
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-    const form = {...ModelForm};
-    form.input[name] = value;
-    let {rules} = Exclusions;
-    let index = +name.split('INPUTVAR')[1];
+  const checkDecisionError = () => {
     let errors = {...Errors};
+    let {rules} = Exclusions;
+    const form = {...ModelForm};
+    let isValid = true;
     rules.forEach(rule => {
-      const {antecedent, consequent, relation} = rule;
-      if(rule.type === "RelationshipEx") {
-        const val = +form.input[`INPUTVAR${relation.index + 1}`]
+      const {antecedent, consequent, relation, type} = rule;
+      if(type === "RelationshipEx") {
+        const formIndex = `INPUTVAR${relation.index + 1}`;
+        const val = +form.input[formIndex]
         if(val > relation.threshold ) {
-          const question = Data.attributes.filter(attr => attr.name === `INPUTVAR${relation.index + 1}`)[0].question;
-          console.log({[`INPUTVAR${relation.index + 1}`]: `${question} must be less than ${relation.threshold}`})
-          errors[`INPUTVAR${relation.index + 1}`] = `${question} must be less than ${relation.threshold}`
+          const question = Data.attributes.filter(attr => attr.name === formIndex)[0].question;
+          console.log({[formIndex]: `${question} must be less than ${relation.threshold}`})
+          errors[formIndex] = `${question} must be less than ${relation.threshold}`;
+          isValid = false;
         }else {
-          errors[`INPUTVAR${relation.index + 1}`] = null;
+          errors[formIndex] = null;
         }
-      }else if(rule.type === "ValueEx") {
+      }else if(type === "ValueEx") {
         // EQ
         antecedent.forEach((a, i) => {
-          const antVal = form.input[`INPUTVAR${a.index + 1}`];
-          const consVal = form.input[`INPUTVAR${consequent[i].index + 1}`]
-          const question1 = Data.attributes.filter(attr => attr.name === `INPUTVAR${a.index + 1}`)[0].question;
-          // const question2 = Data.attributes.filter(attr => attr.name === `INPUTVAR${consequent[i].index + 1}`)[0].question;
+          const antId = `INPUTVAR${a.index + 1}`;
+          const consId =`INPUTVAR${consequent[i].index + 1}`
+          const antVal = form.input[antId];
+          const consVal = form.input[consId]
+          const question1 = Data.attributes.filter(attr => attr.name === antId)[0].question;
+          // const question2 = Data.attributes.filter(attr => attr.name === consId)[0].question;
           
           if(antVal && consVal && a.threshold === antVal && a.type === 'EQ') {
             if(consequent[i].threshold === consVal && consequent[i].type === 'EQ') {
-              errors[`INPUTVAR${consequent[i].index + 1}`] =  `${consequent[i].threshold} is only applicable for ${question1} : ${antecedent[i].threshold}`;
+              errors[consId] = '';
             }else {
-              errors[`INPUTVAR${consequent[i].index + 1}`] = '';
-            }
-          }else
-          if(antVal && consVal && a.threshold !== antVal && a.type === 'NEQ') {
-            if(consequent[i].threshold !== consVal && consequent[i].type === 'NEQ') {
-              errors[`INPUTVAR${consequent[i].index + 1}`] =  `${consequent[i].threshold} is only applicable for ${question1} : ${antecedent[i].threshold}`;
-            }else {
-              errors[`INPUTVAR${consequent[i].index + 1}`] = '';
+              errors[consId] =  `${consequent[i].threshold} is only applicable for ${question1} : ${antecedent[i].threshold}`;
+              isValid = false;
             }
           }
+          
+          if(antVal && consVal && a.threshold !== antVal && a.type === 'NEQ') {
+            if(consequent[i].threshold !== consVal && consequent[i].type === 'NEQ') {
+              errors[consId] = '';
+            }else {
+              errors[consId] =  `${consequent[i].threshold} is only applicable for ${question1} : ${antecedent[i].threshold}`;
+              isValid = false;
+            }
+          }
+
+
         });
         
       }
     })
-    setModelForm({...ModelForm, ...form});
-    setErrors({...Errors, ...errors});
+
+    setErrors({...errors});
+    return isValid;
+  }
+
+  const validateForm = () => {
+    const {input} = ModelForm;
+    let errors = {...Errors};
+    let isValid = true;
+    Object.entries(input).forEach((entries, index) => {
+      let [key, val] = entries;
+      if(!val) {
+        errors[key] = 'This field is required';
+        isValid = false;
+      }
+    });
+    setErrors({...errors});
+    return isValid;
+  }
+
+  const handleChange = (e) => {
+    const {name, value} = e.target;
+    const form = {...ModelForm};
+    form.input[name] = value;
+    checkDecisionError();
+    setModelForm({...form});
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const {input} = ModelForm;
-    debugger
+    if(!checkDecisionError() || !validateForm()) {
+      return;
+    }
+
     const data = {
       data: {
         type: 'scenario',
@@ -138,23 +181,15 @@ function App() {
     })
   }
 
-  
-  // console.log(data)
-  const getData = () => {
-    const model = source.data.attributes;
-    const name = model.name;
-    const description = model.description;
-    const metadata = model.metadata;
-    const prediction = metadata.prediction;
-    const attributes = metadata.attributes;
-    return { name, description, prediction, attributes }
-  }
-
   return (
     <div className="App">
+      <a href="https://www.flaticon.com/free-icons/api" title="api icons">Api icons created by Freepik - Flaticon</a>
       <header>
+        <img src="/images/api.png" alt="Api logo" />
         <h1>{Data?.name}</h1>
+        <p>{Data?.description}</p>
       </header>
+      
       <form onSubmit={handleSubmit} noValidate>
         {Data?.prediction && 
           <div>
@@ -169,6 +204,7 @@ function App() {
                 })}
               </select>
             }
+            {Errors[Data?.prediction?.name] && <span className='error'>{Errors[Data?.prediction?.name]}</span>}
           </div>
         }
         {Data?.attributes?.map((item, index) => {
@@ -181,16 +217,17 @@ function App() {
                   <input 
                     required
                     onChange={handleChange}
-                    value={ModelForm.input[item.name]}
+                    value={ModelForm.input[item.name] || 0}
                     name={item.name}
                     type="range"
                     min={item.domain.lower}
                     max={item.domain.upper}
                     step={item.domain.interval}
+                    className="transition duration-150 ease-in-out"
+                    data-bs-toggle="tooltip" title={ModelForm.input[item.name] || 0}
                   />
                   <i className='end index'>{item.domain.upper}</i>
                   {Errors[item.name] && <span className='error'>{Errors[item.name]}</span>}
-                  {/* <span className='invalid-feedback'></span> */}
                 </>
                 }
                 {item.domain.type === 'DomainC' && 
