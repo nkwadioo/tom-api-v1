@@ -9,10 +9,17 @@ function App() {
   const [ModelForm, setModelForm] = useState({input: {}})
   const [Exclusions, setExclusions] = useState({rules: {}})
   const [Errors, setErrors] = useState({})
+  const [Alert, setAlert] = useState({show: false, message: '', type: ''})
 
   const url = 'https://api.up2tom.com/v3';
 
-  
+  const showMessage = (message, type, time = 1400) => {
+    setAlert({show: true, message, type})
+    setTimeout(() => {
+      setAlert({show: false, message: '', type: null})
+    }, time)
+  }
+
   const getModels = () => {
     fetch(`${url}/models`, {
       method: 'GET',
@@ -25,18 +32,20 @@ function App() {
     }).then((res) => res.json())
     .then((res) => {
       if(res.error || res.errors || !res.data) {
-        alert('Error loading model')
+        showMessage('Error loading models', 'error');
         return;
       }
-      debugger;
       setModels([...res.data])
     });
   }
 
   const getModelData = (event) => {
     const {value} = event.target;
+    setData([])
     getData2(value);
   }
+
+  
 
   const getData2 = (modelId) => {
     // try {
@@ -55,7 +64,7 @@ function App() {
       .then((res) => res.json())
       .then((res) => {
         if(res.error || res.errors || !res.data) {
-          alert('Error loading model')
+          showMessage('Error loading model data', 'error');
           return;
         }
         const model = {...res?.data?.attributes};
@@ -77,6 +86,8 @@ function App() {
             ...att
           }
         });
+
+        showMessage('Model loaded successfully', 'success');
 
       })   
     // } catch (err) {
@@ -178,7 +189,7 @@ function App() {
     e.preventDefault();
     const {input} = ModelForm;
     if(!checkDecisionError() || !validateForm()) {
-      alert('Validation Error')
+      showMessage('Please fill all the required fields', 'error');
       return;
     }
 
@@ -203,10 +214,10 @@ function App() {
     .then((res) => res.json())
     .then((res) => {
       if(res.error || res.errors) {
-        alert('Unable to submit model')
+        showMessage('Unable to submit model', 'error');
         return;
       }
-      alert('Successfully submitted model')
+      showMessage('Model submitted successfully', 'success');
       console.log(res);
     })
   }
@@ -214,34 +225,37 @@ function App() {
   return (
     <div className="App">
       <div className="notification">
-        <div class="bg-green-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
-                    w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
-                    hidden
-                    ">
-          <div class="flex flex-row">
-            <div class="px-2">
-            </div>
-            <div class="ml-2 mr-6">
-              <span class="font-semibold">Successfully Submitted!</span>
-              <span class="block text-white">Message</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-red-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
+        {Alert.show && Alert.type === 'success' &&
+          <div className="bg-green-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
                       w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
-                      hidden
                       ">
-          <div class="flex flex-row">
-            <div class="px-2">
-            </div>
-            <div class="ml-2 mr-6">
-              <span class="font-semibold">Error Submitting!</span>
-              <span class="block text-white">Message</span>
+            <div className="flex flex-row">
+              <div className="px-2">
+              </div>
+              <div className="ml-2 mr-6">
+                <span className="font-semibold">Success!</span>
+                <span className="block text-white">{Alert.message}</span>
+              </div>
             </div>
           </div>
-        </div>
+        }
+
+        {Alert.show && Alert.type === 'error' &&
+          <div className="bg-red-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
+                        w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
+                        ">
+            <div className="flex flex-row">
+              <div className="px-2">
+              </div>
+              <div className="ml-2 mr-6">
+                <span className="font-semibold">Error!</span>
+                <span className="block text-white">{Alert.message}</span>
+              </div>
+            </div>
+          </div>
+        }
       </div>
+        
       
     <>
       <nav className='shadow'>
@@ -281,8 +295,8 @@ function App() {
                   })
                 }
               </select>
-              <label for="prediction" className='control-label'>Prediction name</label> 
-              <i class="bar"></i>
+              <label htmlFor="prediction" className='control-label'>Prediction name</label> 
+              <i className="bar"></i>
             </div>
             <span className='font-thin'>{Data.description}</span>
           </form>
