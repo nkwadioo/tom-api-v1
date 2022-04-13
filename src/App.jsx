@@ -1,4 +1,7 @@
 import React, { useState, useEffect, Fragment  } from 'react';
+import Nav from './components/Nav';
+import Form from './components/Form';
+import Alerts from './components/Alerts';
 import './App.css';
 
 
@@ -224,63 +227,8 @@ function App() {
 
   return (
     <div className="App">
-      <div className="notification">
-        {Alert.show && Alert.type === 'success' &&
-          <div className="bg-green-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
-                      w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
-                      ">
-            <div className="flex flex-row">
-              <div className="px-2">
-              </div>
-              <div className="ml-2 mr-6">
-                <span className="font-semibold">Success!</span>
-                <span className="block text-white">{Alert.message}</span>
-              </div>
-            </div>
-          </div>
-        }
-
-        {Alert.show && Alert.type === 'error' &&
-          <div className="bg-red-400 opacity-100 z-10 rounded-lg border-gray-300 border p-3 shadow-lg
-                        w-5/6 lg:w-3/6 ml-auto fixed top-2 right-1
-                        ">
-            <div className="flex flex-row">
-              <div className="px-2">
-              </div>
-              <div className="ml-2 mr-6">
-                <span className="font-semibold">Error!</span>
-                <span className="block text-white">{Alert.message}</span>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-        
-      
-    <>
-      <nav className='shadow'>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink flex content-center">
-                <img
-                  className="h-8 w-8"
-                  src="/images/api.png"
-                  alt="Workflow"
-                />
-                <span className='self-end'>TOM API Demo</span>
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <div className="ml-4 flex items-center md:ml-6">
-                {/* Profile dropdown */}
-                <span className="sr-only">Open user menu</span>
-                <img className="h-8 w-8 rounded-full" src="/images/profile.jpg" alt="" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Alerts Alert={Alert} />
+      <Nav />
       <header className="lg:container mx-auto">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <form className="sm:w-6/12 w-full mx-auto">
@@ -305,85 +253,9 @@ function App() {
       <div className="min-h-full">
         
         <main className="lg:container mx-auto">
-          <form onSubmit={handleSubmit}
-                className="max-w-7xl mx-auto py-6 px-6 lg:px-8"
-                noValidate>
-            <div className="grid sm:grid-cols-2 sm:gap-6 md:grid-cols-3 md:gap-8">
-              {Data?.prediction && 
-                <div className="form-group"> 
-                  {Data?.prediction?.domain?.type === 'DomainC' && 
-                    <select required name={Data?.prediction?.name}
-                            value={ModelForm.input[Data?.prediction?.name]}
-                            onChange={handleChange}>
-                      <option value="">Select Option</option>
-                      {Data?.prediction?.domain.values.map((v, i) => {
-                        return <option key={i} value={v}>{v}</option>
-                      })}
-                    </select>
-                  }
-                  <i className="bar"></i>
-                  <label htmlFor={Data?.prediction?.name} className='control-label'>{Data?.prediction?.question}</label>
-                  {Errors[Data?.prediction?.name] && <span className='error'>{Errors[Data?.prediction?.name]}</span>}
-                </div>
-              }
-              {Data?.attributes?.map((item, index) => {
-                  return (
-                    <div className="form-group" key={index}>
-                      
-                      {item.domain.type === 'DomainR' && 
-                      <>
-                        <i className='start index'>{item.domain.lower}</i>
-                        <i className='end index float-right'>{item.domain.upper}</i>
-                        <input 
-                          onChange={handleChange}
-                          value={ModelForm.input[item.name] || 0}
-                          name={item.name}
-                          type="range"
-                          min={item.domain.lower}
-                          max={item.domain.upper}
-                          step={item.domain.interval}
-                          className="transition duration-150 ease-in-out"
-                          data-bs-toggle="tooltip" title={ModelForm.input[item.name] || 0}
-                        />
-                        {Errors[item.name] && <span className='error'>{Errors[item.name]}</span>}
-                      </>
-                      }
-                      {item.domain.type === 'DomainC' && 
-                      <>
-                        <select required name={item.name} value={ModelForm.input[item.name]} onChange={handleChange}>
-                          <option value="">Select Option</option>
-                          {item.domain.values.map((v, i) => {
-                            return <option key={i} value={v}>{v}</option>
-                          })}
-                        </select>
-                        <i className="bar"></i>
-                      </>
-                      }
-                      <label htmlFor={item.name} className='control-label'>{item.question}</label>
-                      {Errors[item.name] && <span className='error'>{Errors[item.name]}</span>}
-                    </div>
-                  )
-              })}
-
-            </div>
-            {Data.prediction && 
-              <button type="submit" className='bg-blue-500 hover:bg-blue-600 float-right px-3 py-1'>Submit &gt; </button>
-            }
-            {!Data?.prediction && 
-              <button type="button" className='bg-blue-200 text-gray-700 pointer-events-none float-right px-3 py-1'>Submit &gt; </button>
-            }
-            
-          
-          </form>
+          <Form Data={Data} Errors={Errors} ModelForm={ModelForm} handleChange={handleChange} handleSubmit={handleSubmit} />
         </main>
       </div>
-
-      
-    </>
-      
-      
-      
-
       <a href="https://www.flaticon.com/free-icons/api" title="api icons">Api icons created by Freepik - Flaticon</a>
     </div>
 
