@@ -47,10 +47,10 @@ export default function Form({Data, Errors, ModelForm, handleChange, handleSubmi
                       }
                       {item.domain.type === 'DomainC' && 
                       <>
-                        <select required name={item.name} value={ModelForm.input[item.name]} onChange={handleChange}>
+                        <select  key={item.name} required name={item.name} value={ModelForm.input[item.name]} onChange={handleChange}>
                           <option value="">Select Option</option>
                           {item.domain.values.map((v, i) => {
-                            return <option key={i} value={v}>{v}</option>
+                            return <option value={v}>{v}</option>
                           })}
                         </select>
                         <i className="bar"></i>

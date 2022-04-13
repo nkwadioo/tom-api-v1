@@ -82,7 +82,9 @@ function App() {
         setExclusions({...exclusions})
         setData({id: res?.data?.id, name, description, prediction, attributes});
         const att = {};
-        attributes.map(a => att[a.name] = a.domain.type === 'DomainR' ? 0 : '');
+        attributes.map(a => att[a.name] = a.domain.type === 'DomainR' ? 
+          (a.domain.lower < 0 ? 0 : a.domain.lower) :
+          '');
         setModelId(modelId);
         setModelForm({
           input: {
@@ -160,8 +162,8 @@ function App() {
   }
   
   const checkValue = (e) => {
-    const {name, value, required} = e.target;
-    if(!value && required) {
+    const {name, value} = e.target;
+    if(!value && value !== 0) {
       setErrors({[name]: 'This field is required'});
     }else {
       setErrors({[name]: null});
