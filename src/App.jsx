@@ -3,15 +3,47 @@ import './App.css';
 
 
 function App() {
-  const [Data, setData] = useState({})
+  const [Data, setData] = useState([])
+  const [Models, setModels] = useState({})
+  const [ModelId, setModelId] = useState('')
   const [ModelForm, setModelForm] = useState({input: {}})
   const [Exclusions, setExclusions] = useState({rules: {}})
   const [Errors, setErrors] = useState({})
 
+  const url = 'https://api.up2tom.com/v3';
+
   
-  const getData2 = () => {
+  const getModels = () => {
+    fetch(`${url}/models`, {
+      method: 'GET',
+      mode: 'cors',
+      crossDomain:true,
+      headers: {
+        'Authorization': 'Token 9307bfd5fa011428ff198bb37547f979',
+        'Content-type': 'application/vnd.api+json'
+      }
+    }).then((res) => res.json())
+    .then((res) => {
+      if(res.error || res.errors || !res.data) {
+        alert('Error loading model')
+        return;
+      }
+      debugger;
+      setModels([...res.data])
+    });
+  }
+
+  const getModelData = (event) => {
+    const {value} = event.target;
+    getData2(value);
+  }
+
+  const getData2 = (modelId) => {
     // try {
-      fetch('https://api.up2tom.com/v3/models/58d3bcf97c6b1644db73ad12', {
+      if(!modelId) {
+        return;
+      }
+      fetch(`${url}/models/${modelId}`, {
         method: 'GET',
         mode: 'cors',
         crossDomain:true,
@@ -38,6 +70,7 @@ function App() {
         setData({id: res?.data?.id, name, description, prediction, attributes});
         const att = {};
         attributes.map(a => att[a.name] = '');
+        setModelId(modelId);
         setModelForm({
           input: {
             [prediction.name]: '',
@@ -52,7 +85,7 @@ function App() {
   }
 
   useEffect(() => {
-    getData2();
+    getModels();
   }, [])
 
   const checkDecisionError = () => {
@@ -157,7 +190,7 @@ function App() {
         }
       }
     }
-    fetch('https://api.up2tom.com/v3/decision/58d3bcf97c6b1644db73ad12', {
+    fetch(`${url}/decision/${ModelId}`, {
       method: 'POST',
       mode: 'cors',
       crossDomain:true,
@@ -238,8 +271,15 @@ function App() {
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <form className="sm:w-6/12 w-full mx-auto">
             <div className="form-group">
-              <select name="prediction">
-                <option value="Drink choice">Drink choice</option>
+              <select name="prediction" onChange={getModelData}>
+                <option value="">Select Model</option>
+                {Models.length && 
+                  Models.map((model, index) => {
+                    return (
+                      <option value={model.id} key={index}>{model.attributes?.name}</option>
+                    )
+                  })
+                }
               </select>
               <label for="prediction" className='control-label'>Prediction name</label> 
               <i class="bar"></i>
