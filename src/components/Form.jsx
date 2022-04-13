@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export default function Form({Data, Errors, ModelForm, handleChange, handleSubmit}) {
   return (
@@ -29,8 +29,6 @@ export default function Form({Data, Errors, ModelForm, handleChange, handleSubmi
                       
                       {item.domain.type === 'DomainR' && 
                       <>
-                        <i className='start index'>{item.domain.lower}</i>
-                        <i className='end index float-right'>{item.domain.upper}</i>
                         <input 
                           onChange={handleChange}
                           value={ModelForm.input[item.name] || 0}
@@ -42,6 +40,8 @@ export default function Form({Data, Errors, ModelForm, handleChange, handleSubmi
                           className="transition duration-150 ease-in-out"
                           data-bs-toggle="tooltip" title={ModelForm.input[item.name] || 0}
                         />
+                        <i className='start index'>{item.domain.lower}</i>
+                        <i className='end index float-right'>{item.domain.upper}</i>
                         {Errors[item.name] && <span className='error'>{Errors[item.name]}</span>}
                       </>
                       }

@@ -45,6 +45,7 @@ function App() {
   const getModelData = (event) => {
     const {value} = event.target;
     setData([])
+
     getData2(value);
   }
 
@@ -81,7 +82,7 @@ function App() {
         setExclusions({...exclusions})
         setData({id: res?.data?.id, name, description, prediction, attributes});
         const att = {};
-        attributes.map(a => att[a.name] = '');
+        attributes.map(a => att[a.name] = a.domain.type === 'DomainR' ? 0 : '');
         setModelId(modelId);
         setModelForm({
           input: {
@@ -157,22 +158,28 @@ function App() {
     setErrors({...errors});
     return isValid;
   }
+  
+  const checkValue = (e) => {
+    const {name, value, required} = e.target;
+    if(!value && required) {
+      setErrors({[name]: 'This field is required'});
+    }else {
+      setErrors({[name]: null});
+    }
+  }
 
-  const validateForm = (name = null) => {
+  const validateForm = () => {
     const {input} = ModelForm;
     let errors = {...Errors};
     let isValid = true;
-    if(name) {
-      if(!input[name]) {
-        return
-      }
-      return
-    }
+   
     Object.entries(input).forEach((entries, index) => {
       let [key, val] = entries;
-      if(!val) {
+      if(!val && val !== 0) {
         errors[key] = 'This field is required';
         isValid = false;
+      }else {
+        errors[key] = null;
       }
     });
     setErrors({...errors});
@@ -183,8 +190,9 @@ function App() {
     const {name, value} = e.target;
     const form = {...ModelForm};
     form.input[name] = value;
+    
+    checkValue(e)
     checkDecisionError();
-    validateForm(name)
     setModelForm({...form});
   }
 
@@ -223,6 +231,10 @@ function App() {
       showMessage('Model submitted successfully', 'success');
       console.log(res);
     })
+  }
+
+  const handleBlur = (e) => {
+    validateForm(e.target.name);
   }
 
   return (
