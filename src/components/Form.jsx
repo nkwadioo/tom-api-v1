@@ -31,14 +31,14 @@ export default function Form({Data, Errors, ModelForm, handleChange, handleSubmi
                       <>
                         <input 
                           onChange={handleChange}
-                          value={ModelForm.input[item.name] || 0}
+                          value={ModelForm.input[item.name]}
                           name={item.name}
                           type="range"
                           min={item.domain.lower}
                           max={item.domain.upper}
                           step={item.domain.interval}
+                          data-bs-toggle="tooltip" title={ModelForm.input[item.name]}
                           className="transition duration-150 ease-in-out"
-                          data-bs-toggle="tooltip" title={ModelForm.input[item.name] || 0}
                         />
                         <i className='start index'>{item.domain.lower}</i>
                         <i className='end index float-right'>{item.domain.upper}</i>

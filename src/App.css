@@ -28,6 +28,18 @@ button::after {
   border-right: .7rem solid white  ;
 }
 
+
+datalist {
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: space-between;
+  padding: 0 .4rem;
+}
+
+details option {
+  font-size: 2px;
+}
+
 /* Taken from https: //codepen.io/llabrie/pen/drevqR?editors=1100 */
 
 .form-radio,
